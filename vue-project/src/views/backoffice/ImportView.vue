@@ -48,23 +48,86 @@
     <div v-if="termine" class="termine">
       Importation terminee : {{ succes }} reussis, {{ echecs }} echecs.
     </div>
+
+    <hr style="margin: 40px 0; border: 1px solid #000000;"/>
+
+    
+    <h1>Import des tickets</h1>
+    <p class="description">Importer votre fichier CSV pour les tickets</p>
+
+    <div class="upload-zone">
+        <label for="fichierTickets">Choisir le fichier CSV tickets</label>
+        <input id="fichierTickets" type="file" accept=".csv" @change="chargerFichierTickets" />
+    </div>
+
+    <div v-if="rowsTickets.length > 0" class="apercu">
+        <p>{{ rowsTickets.length }} tickets detectes</p>
+        <table class="csv-table">
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Date</th>
+                    <th>Titre</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(row, i) in rowsTickets" :key="i">
+                    <td>{{ row.Num_Ticket }}</td>
+                    <td>{{ row.Date }}</td>
+                    <td>{{ row.Titre }}</td>
+                    <td>{{ row.Description }}</td>
+                    <td>{{ row.Status }}</td>
+                    <td>{{ row.Priority }}</td>
+                    <td>{{ row.Items }}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <button @click="importerTickets" :disabled="chargementTickets">
+            {{ chargementTickets ? 'Importation en cours...' : 'Lancer l importation tickets' }}
+        </button>
+
+        <div v-if="logsTickets.length > 0" class="logs">
+            <h2>Progression tickets</h2>
+            <div v-for="(log, i) in logsTickets" :key="i" :class="['log-ligne', log.type]">
+                {{ log.message }}
+            </div>
+        </div>
+
+        <div v-if="termineTickets" class="termine">
+            Importation tickets termine : {{ succesTickets }} reussis, {{ echecsTickets }} echecs.
+        </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Papa from 'papaparse'
 import api from '../../composables/useSnipitApi.js'
-
+import { getDatabase, sauvegarderDatabase } from '../../composables/useDatabase.js'
 export default {
   name: 'ImportView',
   data() {
     return {
+        //feuil 1
       rows: [],
       logs: [],
       chargement: false,
       termine: false,
       succes: 0,
-      echecs: 0
+      echecs: 0,
+
+        //feuil 2
+       rowsTickets: [],
+       logsTickets: [],
+       chargementTickets: false,
+       termineTickets: false,
+       succesTickets: 0,
+       echecsTickets: 0
     }
   },
   methods: {
@@ -202,6 +265,66 @@ export default {
 
       this.chargement = false
       this.termine = true
+    },
+
+    //TICKETS
+    chargerFichierTickets(event) {
+        const fichier = event.target.files[0]
+        if (!fichier) return
+        this.rowsTickets = []
+        this.logsTickets = []
+        this.termineTickets = false
+        Papa.parse(fichier, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (resultat) => {
+                this.rowsTickets = resultat.data
+            }
+        })
+    },
+
+    async importerTickets() {
+        this.chargementTickets = true
+        this.logsTickets = []
+        this.succesTickets = 0
+        this.echecsTickets = false
+        this.termineTickets = false
+
+        try {
+            const db = await getDatabase()
+
+            db.run('DELETE FROM tickets')
+
+            for (const ligne of this.rowsTickets) {
+                try {
+                    db.run(
+                        'INSERT INTO tickets (id, date, heure, titre, description, status, priority, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        [
+                            parseInt(ligne.Num_Ticket),
+                            ligne.Date,
+                            ligne.Heure,
+                            ligne.Titre,
+                            ligne.Description,
+                            ligne.Status,
+                            ligne.Priority,
+                            ligne.Items
+
+                        ]
+                    )
+                    this.succesTickets++
+                    this.logsTickets.push({type: 'ok', message: `OK : Ticket #${ligne.Num_Ticket} - ${ligne.Titre}` })
+                } catch (err) {
+                    this.echecsTickets++
+                    this.logsTickets.push({type: 'erreur', message: `ERREUR : Ticket #${ligne.Num_Ticket} - ${err.message}`})
+                }
+            }
+            sauvegarderDatabase(db)
+            this.termineTickets = true
+        } catch (err) {
+            this.logsTickets.push({type: 'erreur', message: `Erreur SQLite : ${err.message}`})
+        } finally {
+            this.chargementTickets = false
+        }
     }
   }
 }
