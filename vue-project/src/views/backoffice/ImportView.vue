@@ -86,7 +86,7 @@ export default {
     },
 
     async getOuCreer(endpoint, name, extraData = {}) {
-      const res = await api.get(`/${endpoint}?search=${encodeURIComponent(name)}&limit=10`)
+      const res = await api.get(`/${endpoint}?search=${encodeURIComponent(name)}&limit=50`)
       const rows = res.data?.rows || []
       const trouve = rows.find(r => r.name?.toLowerCase() === name.toLowerCase())
       if (trouve) return trouve.id
@@ -94,27 +94,73 @@ export default {
       return creation.data?.payload?.id
     },
 
+    async getOuCreerUser(firstName, lastName, username, email, departmentId) {
+      const res = await api.get(`/users?search=${encodeURIComponent(username)}&limit=50`)
+      const rows = res.data?.rows || []
+      const trouve = rows.find(r => r.username === username)
+      if (trouve) return trouve.id
+
+      const creation = await api.post('/users', {
+        first_name: firstName,
+        last_name: lastName,
+        username: username,
+        email: email,
+        password: 'Password1234!',
+        password_confirmation: 'Password1234!',
+        department_id: departmentId,
+        activated: true
+      })
+      return creation.data?.payload?.id
+    },
+
     convertirDate(date) {
-    if (!date) return null
-    const parties = date.split('/')
-    if (parties.length !== 3) return null
-    return `${parties[2]}-${parties[1]}-${parties[0]}`
+      if (!date) return null
+      const parties = date.split('/')
+      if (parties.length !== 3) return null
+      return `${parties[2]}-${parties[1]}-${parties[0]}`
     },
 
     async importerLigne(ligne) {
-    const categoryId = await this.getOuCreer('categories', ligne.category, {
+      // 1. Categorie
+      const categoryId = await this.getOuCreer('categories', ligne.category, {
         category_type: 'asset'
-    })
-    const manufacturerId = await this.getOuCreer('manufacturers', ligne.manufacturer)
-    const modelId = await this.getOuCreer('models', ligne.model, {
+      })
+
+      // 2. Fabricant
+      const manufacturerId = await this.getOuCreer('manufacturers', ligne.manufacturer)
+
+      // 3. Modele
+      const modelId = await this.getOuCreer('models', ligne.model, {
         category_id: categoryId,
         manufacturer_id: manufacturerId
-    })
-    const statusId = await this.getOuCreer('statuslabels', ligne.status, {
-        type: 'deployable'
-    })
+      })
 
-    await api.post('/hardware', {
+      // 4. Statut
+      const statusId = await this.getOuCreer('statuslabels', ligne.status, {
+        type: 'deployable'
+      })
+
+      // 5. Departement
+      const departmentId = await this.getOuCreer('departments', ligne.department)
+
+      // 6. Utilisateur
+      const nomComplet = ligne.user.trim().split(' ')
+      const firstName = nomComplet[0] || 'Inconnu'
+      const lastName = nomComplet.slice(1).join(' ') || 'Inconnu'
+      const username = ligne.email
+        ? ligne.email.split('@')[0]
+        : ligne.user.replace(' ', '.').toLowerCase()
+
+      const userId = await this.getOuCreerUser(
+        firstName,
+        lastName,
+        username,
+        ligne.email,
+        departmentId
+      )
+
+      // 7. Creer l'asset
+      const assetRes = await api.post('/hardware', {
         name: ligne.name,
         asset_tag: ligne.asset_tag,
         serial: ligne.serial,
@@ -122,7 +168,17 @@ export default {
         status_id: statusId,
         purchase_date: this.convertirDate(ligne.purchase_date),
         purchase_cost: ligne.purchase_cost
-    })
+      })
+
+      const assetId = assetRes.data?.payload?.id
+
+      // 8. Checkout vers l'utilisateur
+      if (assetId && userId) {
+        await api.post(`/hardware/${assetId}/checkout`, {
+          checkout_to_type: 'user',
+          assigned_user: userId
+        })
+      }
     },
 
     async importer() {
