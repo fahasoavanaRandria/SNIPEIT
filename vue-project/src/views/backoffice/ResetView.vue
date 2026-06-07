@@ -19,6 +19,7 @@
 
 <script>
 import axios from 'axios'
+import { reinitialiserDatabase } from '../../composables/useDatabase';
 
 export default {
     name: 'ResetView',
@@ -34,9 +35,15 @@ export default {
             this.message = ''
             this.erreur = ''
             try {
+                // RESET SNIPEIT
                 const response = await axios.post('http://localhost:3000/reset')
+
+                //RESET TICKET SQLITE
+                reinitialiserDatabase()
+
                 this.message = response.data.message
                 this.confirmer = false
+                
             } catch (err) {
                 this.erreur = 'Erreur lors de la reinitialisation : ' + err.message
                 this.confirmer = false

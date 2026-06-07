@@ -8,9 +8,8 @@
         <thead>
           <tr>
             <th>Num</th>
-            <th>Date</th>
-            <th>Heure</th>
             <th>Titre</th>
+            <th>Description</th>
             <th>Status</th>
             <th>Priority</th>
             <th>Action</th>
@@ -19,9 +18,8 @@
         <tbody>
           <tr v-for="ticket in tickets" :key="ticket.id">
             <td>{{ ticket.id }}</td>
-            <td>{{ ticket.date }}</td>
-            <td>{{ ticket.heure }}</td>
             <td>{{ ticket.titre }}</td>
+            <td>{{ ticket.description }}</td>
             <td>{{ ticket.status }}</td>
             <td>{{ ticket.priority }}</td>
             <td>
@@ -52,7 +50,7 @@
       </div>
 
       <div class="fiche-ligne">
-        <span class="fiche-label">Date</span>
+        <span class="fiche-label">Date et heure</span>
         <span>{{ ticketSelectionne.date }} a {{ ticketSelectionne.heure }}</span>
       </div>
 

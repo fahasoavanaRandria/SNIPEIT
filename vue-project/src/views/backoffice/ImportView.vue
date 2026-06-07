@@ -15,9 +15,11 @@
           <tr>
             <th>asset_tag</th>
             <th>name</th>
+            <th>company</th>
             <th>category</th>
             <th>manufacturer</th>
             <th>model</th>
+            <th>department</th>
             <th>status</th>
           </tr>
         </thead>
@@ -25,9 +27,11 @@
           <tr v-for="(row, i) in rows" :key="i">
             <td>{{ row.asset_tag }}</td>
             <td>{{ row.name }}</td>
+            <td>{{ row.company }}</td>
             <td>{{ row.category }}</td>
             <td>{{ row.manufacturer }}</td>
             <td>{{ row.model }}</td>
+            <td>{{ row.department }}</td>
             <td>{{ row.status }}</td>
           </tr>
         </tbody>
@@ -206,7 +210,10 @@ export default {
       // 5. Departement
       const departmentId = await this.getOuCreer('departments', ligne.department)
 
-      // 6. Utilisateur
+      // 6.Company
+      const companyId = await this.getOuCreer('companies', ligne.company)
+
+      // 7. Utilisateur
       const nomComplet = ligne.user.trim().split(' ')
       const firstName = nomComplet[0] || 'Inconnu'
       const lastName = nomComplet.slice(1).join(' ') || 'Inconnu'
@@ -222,7 +229,7 @@ export default {
         departmentId
       )
 
-      // 7. Creer l'asset
+      // 8. Creer l'asset
       const assetRes = await api.post('/hardware', {
         name: ligne.name,
         asset_tag: ligne.asset_tag,
@@ -230,12 +237,14 @@ export default {
         model_id: modelId,
         status_id: statusId,
         purchase_date: this.convertirDate(ligne.purchase_date),
-        purchase_cost: ligne.purchase_cost
+        purchase_cost: ligne.purchase_cost,
+        company_id: companyId,
+        department_id: departmentId
       })
 
       const assetId = assetRes.data?.payload?.id
 
-      // 8. Checkout vers l'utilisateur
+      // 9. Checkout vers l'utilisateur
       if (assetId && userId) {
         await api.post(`/hardware/${assetId}/checkout`, {
           checkout_to_type: 'user',

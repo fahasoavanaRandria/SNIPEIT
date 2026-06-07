@@ -3,8 +3,10 @@ import LoginView from '../views/LoginView.vue'
 import BackofficeLayout from '../views/backoffice/BackofficeLayout.vue'
 import DashboardView from '../views/backoffice/DashboardView.vue'
 import ResetView from '../views/backoffice/ResetView.vue'
+import FrontofficeLayout from '../views/frontoffice/FrontofficeLayout.vue'
+import path from 'node:path'
 
-//routes
+//routes BACKOFFICE
 const routes = [
   { path: '/', redirect: '/login'},
 
@@ -33,7 +35,26 @@ const routes = [
         component: () => import('../views/backoffice/TicketsView.vue')
       }
     ]
+  },
+
+  //FRONTOFFICE
+  {
+    path: '/',
+    component: FrontofficeLayout,
+    children: [
+      {
+        path: 'elements',
+        name: 'Elements',
+        component: () => import('../views/frontoffice/ElementsView.vue')
+      },
+      {
+        path: 'nouveau-ticket',
+        name: 'NouveauTicket',
+        component: () => import('../views/frontoffice/NouveauTicketView.vue')
+      }
+    ]
   }
+
 ]
 
 const router = createRouter({
