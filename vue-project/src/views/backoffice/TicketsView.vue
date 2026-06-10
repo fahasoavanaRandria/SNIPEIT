@@ -1,8 +1,7 @@
 <template>
   <div class="tickets-page">
-    <h1>Tickets</h1>
+    <h1>Liste des tickets</h1>
 
-    <!-- Liste des tickets -->
     <div v-if="!ticketSelectionne">
       <table class="tableau">
         <thead>
@@ -83,7 +82,7 @@ export default {
     return {
       tickets: [],
       ticketSelectionne: null,
-      erreur: ''
+      erreur: '',
     }
   },
   async mounted() {
@@ -188,4 +187,5 @@ h2 { font-size: 20px; margin-bottom: 24px; }
   font-size: 14px;
   font-weight: bold;
 }
+
 </style>

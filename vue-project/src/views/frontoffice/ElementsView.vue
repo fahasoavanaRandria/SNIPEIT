@@ -1,12 +1,33 @@
 <template>
     <div class="elements-page">
-        <h1>Elements</h1>
+        <h1>Liste des elements</h1>
 
         <div class="recherche">
-            <input v-model="recherche.nom" type="text" placeholder="Rechercher par nom"/>
-            <input v-model="recherche.categorie" type="text" placeholder="Rechercher par categorie"/>
-            <input v-model="recherche.statut" type="text" placeholder="Rechercher par statut"/>
-            <input v-model="recherche.fabricant" type="text" placeholder="Rechercher par fabricant"/>
+            <div class="recherche-titre">
+                <h5>-- Nom --</h5>
+                <input v-model="recherche.nom" type="text" placeholder="Rechercher par nom 🔍"/>
+            </div>
+            <div class="recherche-titre">
+                <h5>-- Categorie --</h5>
+                <input v-model="recherche.categorie" type="text" placeholder="Rechercher par categorie 🔍"/>
+            </div>
+            <div class="recherche-titre">
+                <h5>-- Statut --</h5>
+                <input v-model="recherche.statut" type="text" placeholder="Rechercher par statut 🔍"/>
+            </div>
+            <div class="recherche-titre">
+                <h5>-- Fabricant --</h5>
+                <input v-model="recherche.fabricant" type="text" placeholder="Rechercher par fabricant 🔍"/>
+            </div>
+            <div class="recherche-titre">
+                <h5>-- Entreprise --</h5>
+                <input v-model="recherche.entreprise" type="text" placeholder="Rechercher par entreprise 🔍">
+            </div>
+            <div class="recherche-titre">
+                <h5>-- Departement --</h5>
+                <input v-model="recherche.departement" type="text" placeholder="Rechercher par departement 🔍">
+            </div>
+
         </div>
 
         <div v-if="chargement" class="chargement">
@@ -75,7 +96,9 @@ export default {
             nom: '',
             categorie: '',
             statut: '',
-            fabricant: ''
+            fabricant: '',
+            entreprise: '',
+            departement: ''
             }
         }
       
@@ -91,7 +114,11 @@ export default {
 
                 const fabricant = asset.manufacturer?.name?.toLowerCase().includes(this.recherche.fabricant.toLowerCase())
 
-                return nom && categorie && statut && fabricant
+                const entreprise = this.recherche.entreprise === '' ? true : asset.company?.name?.toLowerCase().includes(this.recherche.entreprise.toLowerCase())
+
+                const departement = this.recherche.departement === '' ? true : asset.assigned_to?.department?.toLowerCase().includes(this.recherche.departement.toLowerCase())
+
+                return nom && categorie && statut && fabricant && entreprise && departement
 
             })
         }

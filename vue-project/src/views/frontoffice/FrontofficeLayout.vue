@@ -5,6 +5,7 @@
             <nav>
                 <RouterLink to="/elements">Elements</RouterLink>
                 <RouterLink to="/nouveau-ticket">Nouveau ticket</RouterLink>
+                <RouterLink to="/kanban">Kanban</RouterLink>
             </nav>
         </header>
 

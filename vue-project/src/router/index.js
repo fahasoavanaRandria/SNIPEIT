@@ -33,9 +33,16 @@ const routes = [
         path: 'tickets',
         name: 'Tickets',
         component: () => import('../views/backoffice/TicketsView.vue')
-      }
+      },
+      {
+      path: 'parametres',
+      name: 'Parametres',
+      component: () => import('../views/backoffice/ParametresView.vue')
+      },
     ]
   },
+  
+
 
   //FRONTOFFICE
   {
@@ -51,10 +58,14 @@ const routes = [
         path: 'nouveau-ticket',
         name: 'NouveauTicket',
         component: () => import('../views/frontoffice/NouveauTicketView.vue')
+      },
+      {
+        path: 'kanban',
+        name: 'KanbanView',
+        component: () => import('../views/frontoffice/KanbanView.vue')
       }
     ]
-  }
-
+  } 
 ]
 
 const router = createRouter({

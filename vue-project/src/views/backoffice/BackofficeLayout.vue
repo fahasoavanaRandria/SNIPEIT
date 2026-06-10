@@ -9,6 +9,7 @@
                 <RouterLink to="/backoffice/reset">Reinitialisation</RouterLink>
                 <RouterLink to="/backoffice/import">Import</RouterLink>
                 <RouterLink to="/backoffice/tickets">Tickets</RouterLink>
+                <RouterLink to="/backoffice/parametres">Personnalisation</RouterLink>
             </nav>
             <button class="logout" @click="logout">Se deconnecter</button>
         </aside>
