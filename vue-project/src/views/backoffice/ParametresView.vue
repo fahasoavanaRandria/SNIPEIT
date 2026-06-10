@@ -28,7 +28,7 @@
             </div>
             <div class="champ">
                 <label>Version en Malgache - Closed</label>
-                <input type="text" v-model="label_new" placeholder="ex: Vita" />
+                <input type="text" v-model="label_closed" placeholder="ex: Vita" />
             </div>
 
             <button @click="sauvegarder">Sauvegarder</button>

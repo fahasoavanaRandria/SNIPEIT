@@ -367,7 +367,7 @@ h1 {
   border-radius: 6px;
   color: #000000;
   text-transform: capitalize;
-  text-align: justify;
+  text-align: center;
 }
 
 .btn-ajouter:hover { background-color: #eeeeee; }
